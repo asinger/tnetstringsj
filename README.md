@@ -327,11 +327,77 @@ public final class TNetstring {
   public static byte[] dump(final boolean data) {
     return data ? TRUE_BYTES : FALSE_BYTES;
   }
+  
+  public static byte[] dump(final boolean[] data) {
+    if (data == null) return NULL_BYTES;
+    final int length = data.length;
+    final byte[][] result = new byte[length][];
+    int totalSize = 0;
+    for (int i = 0; i < length; i++) {
+      final byte[] bytes = dump(data[i]);
+      totalSize += bytes.length;
+      result[i] = bytes;
+    }
+    return concat(asciiBytes(totalSize + ":"), concat(result), RIGHT_SQUARE_BRACE_BYTES);  
+  }
 
   private static final byte[] POUND_BYTES = new byte[] { '#' };
 
   public static byte[] dump(final long data) {
     return numberBytes(Long.toString(data), POUND_BYTES);
+  }
+
+  public static byte[] dump(final long[] data) {
+    if (data == null) return NULL_BYTES;
+    final int length = data.length;
+    final byte[][] result = new byte[length][];
+    int totalSize = 0;
+    for (int i = 0; i < length; i++) {
+      final byte[] bytes = dump(data[i]);
+      totalSize += bytes.length;
+      result[i] = bytes;
+    }
+    return concat(asciiBytes(totalSize + ":"), concat(result), RIGHT_SQUARE_BRACE_BYTES);  
+  }
+
+  public static byte[] dump(final int[] data) {
+    if (data == null) return NULL_BYTES;
+    final int length = data.length;
+    final byte[][] result = new byte[length][];
+    int totalSize = 0;
+    for (int i = 0; i < length; i++) {
+      final byte[] bytes = dump(data[i]);
+      totalSize += bytes.length;
+      result[i] = bytes;
+    }
+    return concat(asciiBytes(totalSize + ":"), concat(result), RIGHT_SQUARE_BRACE_BYTES);  
+  }
+  
+  public static byte[] dump(final short[] data) {
+    if (data == null) return NULL_BYTES;
+    final int length = data.length;
+    final byte[][] result = new byte[length][];
+    int totalSize = 0;
+    for (int i = 0; i < length; i++) {
+      final byte[] bytes = dump(data[i]);
+      totalSize += bytes.length;
+      result[i] = bytes;
+    }
+    return concat(asciiBytes(totalSize + ":"), concat(result), RIGHT_SQUARE_BRACE_BYTES);  
+  }
+
+  /* Dumps byte array as a list of integers rather than as a binary blob */
+  public static byte[] dumpIntegers(final byte[] data) {
+    if (data == null) return NULL_BYTES;
+    final int length = data.length;
+    final byte[][] result = new byte[length][];
+    int totalSize = 0;
+    for (int i = 0; i < length; i++) {
+      final byte[] bytes = dump(data[i]);
+      totalSize += bytes.length;
+      result[i] = bytes;
+    }
+    return concat(asciiBytes(totalSize + ":"), concat(result), RIGHT_SQUARE_BRACE_BYTES);  
   }
 
   private static final byte[] CARROT_BYTES = new byte[] { '^' };
@@ -346,9 +412,48 @@ public final class TNetstring {
     return numberBytes(format.format(data), CARROT_BYTES);
   }
 
+  public static byte[] dump(final float[] data) {
+    if (data == null) return NULL_BYTES;
+    final int length = data.length;
+    final byte[][] result = new byte[length][];
+    int totalSize = 0;
+    for (int i = 0; i < length; i++) {
+      final byte[] bytes = dump(data[i]);
+      totalSize += bytes.length;
+      result[i] = bytes;
+    }
+    return concat(asciiBytes(totalSize + ":"), concat(result), RIGHT_SQUARE_BRACE_BYTES);  
+  }
+
+  public static byte[] dump(final double[] data) {
+    if (data == null) return NULL_BYTES;
+    final int length = data.length;
+    final byte[][] result = new byte[length][];
+    int totalSize = 0;
+    for (int i = 0; i < length; i++) {
+      final byte[] bytes = dump(data[i]);
+      totalSize += bytes.length;
+      result[i] = bytes;
+    }
+    return concat(asciiBytes(totalSize + ":"), concat(result), RIGHT_SQUARE_BRACE_BYTES);  
+  }
+
   public static byte[] dump(final char data, final Charset charset) {
     return concat(asciiBytes(byteLength(data) + ":"),
       getBytes(String.valueOf(data), charset), COMMA_BYTES);
+  }
+
+  public static byte[] dump(final char[] data, final Charset charset) {
+    if (data == null) return NULL_BYTES;
+    final int length = data.length;
+    final byte[][] result = new byte[length][];
+    int totalSize = 0;
+    for (int i = 0; i < length; i++) {
+      final byte[] bytes = dump(data[i], charset);
+      totalSize += bytes.length;
+      result[i] = bytes;
+    }
+    return concat(asciiBytes(totalSize + ":"), concat(result), RIGHT_SQUARE_BRACE_BYTES);  
   }
   
   private static final byte[] RIGHT_SQUARE_BRACE_BYTES = new byte[] { ']' };
@@ -370,10 +475,6 @@ public final class TNetstring {
       result[i] = bytes;
     }
     return concat(asciiBytes(totalSize + ":"), concat(result), RIGHT_SQUARE_BRACE_BYTES);
-  }
-
-  public static byte[] dumpTest(final String[] data, Charset charset) {
-    return dumpArray(data, charset);
   }
 
   public static byte[] dump(final Object[] data) {
@@ -463,6 +564,13 @@ public final class TNetstring {
     else if (data instanceof List) return dumpList((List<?>) data, charsetForStrings);
     else if (data instanceof Object[]) return dumpArray((Object[]) data, charsetForStrings);
     else if (data instanceof Iterable) return dumpIterable((Iterable<?>) data, charsetForStrings);
+    else if (data instanceof long[]) return dump((long[]) data);
+    else if (data instanceof int[]) return dump((int[]) data);
+    else if (data instanceof short[]) return dump((short[]) data);
+    else if (data instanceof double[]) return dump((double[]) data);
+    else if (data instanceof float[]) return dump((float[]) data);
+    else if (data instanceof char[]) return dump((char[]) data, charsetForStrings);
+    else if (data instanceof boolean[]) return dump((boolean[]) data);
     throw new IllegalArgumentException("Can't serialize a " + data.getClass().getName());
   }
 
