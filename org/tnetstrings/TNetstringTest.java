@@ -187,4 +187,48 @@ public class TNetstringTest {
       TNetstring.dump(Double.MIN_VALUE));
   }
 
+  @Test public void testDumpArrays() {
+    final float[] f = {0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f};
+    assertArrayEquals("72:3:0.0^3:0.0^3:1.0^3:0.0^3:0.0^3:1.0^3:0.0^3:0.0^3:1.0^3:0.0^3:0.0^3:1.0^]".getBytes(ASCII),
+      TNetstring.dump(f));
+
+    final double[] d = {0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0};
+    assertArrayEquals("72:3:0.0^3:0.0^3:1.0^3:0.0^3:0.0^3:1.0^3:0.0^3:0.0^3:1.0^3:0.0^3:0.0^3:1.0^]".getBytes(ASCII),
+      TNetstring.dump(d));
+
+    final double[] nullDoubleArray = null;
+    assertArrayEquals("0:~".getBytes(ASCII), TNetstring.dump(nullDoubleArray));
+
+    final boolean[] b = {true, true, false, true, false};
+    assertArrayEquals("37:4:true!4:true!5:false!4:true!5:false!]".getBytes(ASCII),
+      TNetstring.dump(b));
+
+    final long[] l = {1L, 50000000000L, -12020202020202L};
+    assertArrayEquals("38:1:1#11:50000000000#15:-12020202020202#]".getBytes(ASCII),
+      TNetstring.dump(l));
+
+    final int[] i = {1, 500000, -1202020, 0};
+    assertArrayEquals("28:1:1#6:500000#8:-1202020#1:0#]".getBytes(ASCII),
+      TNetstring.dump(i));
+
+    final short[] s = {1, 5000, -12020, 0};
+    assertArrayEquals("24:1:1#4:5000#6:-12020#1:0#]".getBytes(ASCII),
+      TNetstring.dump(s));
+
+    final char[] c = {'a', '0', 'b', 'Z'};
+    assertArrayEquals("16:1:a,1:0,1:b,1:Z,]".getBytes(ASCII),
+      TNetstring.dump(c, ASCII));
+
+    final byte[] byteIntegers = {1, 50, -120, 0};
+    assertArrayEquals("20:1:1#2:50#4:-120#1:0#]".getBytes(ASCII),
+      TNetstring.dumpIntegers(byteIntegers));
+
+    final Object floatsAsObject = f;
+    assertArrayEquals("72:3:0.0^3:0.0^3:1.0^3:0.0^3:0.0^3:1.0^3:0.0^3:0.0^3:1.0^3:0.0^3:0.0^3:1.0^]".getBytes(ASCII),
+      TNetstring.dump(floatsAsObject));
+
+    final float[] nullFloats = null;
+    assertArrayEquals("0:~".getBytes(ASCII), TNetstring.dump(nullFloats));
+  }
+
 }
