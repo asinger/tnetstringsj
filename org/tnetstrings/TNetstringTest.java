@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import org.junit.Test;
 
@@ -170,6 +171,12 @@ public class TNetstringTest {
   }
 
   @Test public void testDumpDouble() {
+    assertArrayEquals("12:0.0000001001^".getBytes(ASCII), TNetstring.dump(0.0000001001000d));
+    assertArrayEquals("12:0.0020001001^".getBytes(ASCII), TNetstring.dump(.0020001001000d));
+    assertArrayEquals("19:10100000122222222.0^".getBytes(ASCII), TNetstring.dump(10100000122222222.0000001001000d));
+    assertArrayEquals("16:10000.0000001001^".getBytes(ASCII), TNetstring.dump(10000.0000001001000d));
+    
+    Locale.setDefault(Locale.GERMANY); // We should get a '.' decimal separator in any locale, never ','
     assertArrayEquals("12:0.0000001001^".getBytes(ASCII), TNetstring.dump(0.0000001001000d));
     assertArrayEquals("12:0.0020001001^".getBytes(ASCII), TNetstring.dump(.0020001001000d));
     assertArrayEquals("19:10100000122222222.0^".getBytes(ASCII), TNetstring.dump(10100000122222222.0000001001000d));

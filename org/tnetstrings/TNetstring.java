@@ -17,6 +17,7 @@ package org.tnetstrings;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -389,14 +390,20 @@ public final class TNetstring {
 
   private static final byte[] CARROT_BYTES = new byte[] { '^' };
 
+  private static final DecimalFormat DECIMAL_FORMAT;
+  static {
+    final DecimalFormatSymbols dotSeparator = new DecimalFormatSymbols();
+    dotSeparator.setDecimalSeparator('.');
+    DECIMAL_FORMAT = new DecimalFormat("0.0", dotSeparator);
+    DECIMAL_FORMAT.setDecimalSeparatorAlwaysShown(true);
+    DECIMAL_FORMAT.setMinimumFractionDigits(1);
+    DECIMAL_FORMAT.setMaximumFractionDigits(340);
+    DECIMAL_FORMAT.setMinimumIntegerDigits(1);
+    DECIMAL_FORMAT.setGroupingUsed(false);
+  }
+
   public static byte[] dump(final double data) {
-    final DecimalFormat format = new DecimalFormat();
-    format.setDecimalSeparatorAlwaysShown(true);
-    format.setMinimumFractionDigits(1);
-    format.setMaximumFractionDigits(340);
-    format.setMinimumIntegerDigits(1);
-    format.setGroupingUsed(false);
-    return numberBytes(format.format(data), CARROT_BYTES);
+    return numberBytes(((DecimalFormat) DECIMAL_FORMAT.clone()).format(data), CARROT_BYTES);
   }
 
   public static byte[] dump(final float[] data) {
