@@ -30,6 +30,7 @@ package org.tnetstrings;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -266,6 +267,7 @@ public final class TNetstring {
   static String parseString(final byte[] msg, final int from, final int size, final Charset charset) {
     if(!ASCII.equals(charset)) {
       try {
+        // using charset.name() instead of Charset overload because the former is faster
         return new String(msg, from, size, charset.name());
       } catch (final UnsupportedEncodingException e) {
         throw new IllegalArgumentException(e);
@@ -291,6 +293,7 @@ public final class TNetstring {
   static byte[] getBytes(CharSequence s, Charset charset) {
     if(!ASCII.equals(charset)) {
       try {
+        // using charset.name() instead of Charset overload because the former is faster
         return String.valueOf(s).getBytes(charset.name());
       } catch (final UnsupportedEncodingException e) {
         throw new IllegalArgumentException(e);
@@ -317,8 +320,8 @@ public final class TNetstring {
   }
 
   public static byte[] dump(final CharSequence data, final Charset charset) {
-    return concat(asciiBytes(byteLength(data) + ":"),
-      getBytes(data, charset), COMMA_BYTES);
+    final byte[] dataBytes = getBytes(data, charset);
+    return concat(asciiBytes(dataBytes.length + ":"), dataBytes, COMMA_BYTES);
   }
 
   private static final byte[] TRUE_BYTES = asciiBytes("4:true!");
@@ -402,14 +405,20 @@ public final class TNetstring {
 
   private static final byte[] CARROT_BYTES = new byte[] { '^' };
 
+  private static final DecimalFormat DECIMAL_FORMAT;
+  static {
+    final DecimalFormatSymbols dotSeparator = new DecimalFormatSymbols();
+    dotSeparator.setDecimalSeparator('.');
+    DECIMAL_FORMAT = new DecimalFormat("0.0", dotSeparator);
+    DECIMAL_FORMAT.setDecimalSeparatorAlwaysShown(true);
+    DECIMAL_FORMAT.setMinimumFractionDigits(1);
+    DECIMAL_FORMAT.setMaximumFractionDigits(340);
+    DECIMAL_FORMAT.setMinimumIntegerDigits(1);
+    DECIMAL_FORMAT.setGroupingUsed(false);
+  }
+
   public static byte[] dump(final double data) {
-    final DecimalFormat format = new DecimalFormat();
-    format.setDecimalSeparatorAlwaysShown(true);
-    format.setMinimumFractionDigits(1);
-    format.setMaximumFractionDigits(340);
-    format.setMinimumIntegerDigits(1);
-    format.setGroupingUsed(false);
-    return numberBytes(format.format(data), CARROT_BYTES);
+    return numberBytes(((DecimalFormat) DECIMAL_FORMAT.clone()).format(data), CARROT_BYTES);
   }
 
   public static byte[] dump(final float[] data) {
@@ -439,10 +448,11 @@ public final class TNetstring {
   }
 
   public static byte[] dump(final char data, final Charset charset) {
-    return concat(asciiBytes(byteLength(data) + ":"),
-      getBytes(String.valueOf(data), charset), COMMA_BYTES);
+    final byte[] dataBytes = getBytes(String.valueOf(data), charset);
+    return concat(asciiBytes(dataBytes.length + ":"), dataBytes, COMMA_BYTES);
   }
 
+  /* Dumps a tnetstring array of strings */
   public static byte[] dump(final char[] data, final Charset charset) {
     if (data == null) return NULL_BYTES;
     final int length = data.length;
@@ -572,19 +582,6 @@ public final class TNetstring {
     else if (data instanceof char[]) return dump((char[]) data, charsetForStrings);
     else if (data instanceof boolean[]) return dump((boolean[]) data);
     throw new IllegalArgumentException("Can't serialize a " + data.getClass().getName());
-  }
-
-  /** java String.length() does not always equal byte length! */
-  private static int byteLength(final CharSequence s) {
-    int result = 0;
-    for (int i = 0, len = s.length(); i < len; i++) {
-      result += byteLength(s.charAt(i));
-    }
-    return result;
-  }
-
-  private static int byteLength(final char c) {
-    return c > 127 ? 2 : 1;
   }
 
   private static byte[] concat(final byte[]... arrays) {
